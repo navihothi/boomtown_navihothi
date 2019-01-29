@@ -16,41 +16,45 @@ module.exports = gql`
   # scalar Date
 
   type Item {
-    _: Boolean
+    id: ID!
+    title: String!
+    imageurl: String
+    description: String!
+    owner: User
+    borrower: User
+    tags: [Tag!]!
   }
 
   type User {
-    _: Boolean
+    id: ID!
+    username: String!
+    items: [Item]
+    borrowed: [Item]
   }
 
+  # skip 
   type Tag {
-    _: Boolean
-  }
-
-  type File {
-    _: Boolean
-  }
-
-  input AssignedTag {
-    _: Boolean
-  }
-
-  input AssignedBorrower {
-    _: Boolean
+    id: ID!
+    title: String!
   }
 
   input NewItemInput {
-    _: Boolean
+    title: String!
+    imageurl: String
+    description: String!
+    ownerID: ID!
+    borrowerID: ID
+    tagids: [ID!]
   }
 
   type Query {
     user(id: ID!): User
     viewer: User
-    items(filter: ID): [Item]
+    items(idToOmit: ID): [Item]
     tags: [Tag]
   }
 
   type Mutation {
-    addItem: Boolean
+    addItem(input: NewItemInput!): Item!
   }
 `;

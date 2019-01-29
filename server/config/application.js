@@ -46,10 +46,9 @@ module.exports = (app) => {
    */ //PG_HOST stands for post gres host
 
   app.set('PG_HOST', process.env.PG_HOST || 'localhost')
-  //app.set('PORT')
   app.set('PG_USER', process.env.PG_USER || 'boomtown')
   app.set('PG_PASSWORD', process.env.PG_PASSWORD || 'boomtown')
-  TODO: app.set('PG_DB', process.env.PG_DB || 'boomtown') // DB = DATABASE
+  app.set('PG_DB', process.env.PG_DB || 'boomtown') // DB = DATABASE
   app.set('JWT_SECRET', process.env.JWT_SECRET || 'DEV_SECRET')
 
   app.use(cookieParser());

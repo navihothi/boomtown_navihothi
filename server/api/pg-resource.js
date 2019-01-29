@@ -19,13 +19,14 @@ function tagsQueryString(tags, itemid, result) {
 
 module.exports = (postgres) => {
   return {
+    //LATER- pt.2
     async createUser({ fullname, email, password }) {
       const newUserInsert = {
-        text: '', // @TODO: Authentication - Server
+        text: '', // @TODO: Authentication - Server // ''
         values: [fullname, email, password]
       };
       try {
-        const user = await postgres.query(newUserInsert);
+        const user = await postgres.query(newUserInsert); 
         return user.rows[0];
       } catch (e) {
         switch (true) {
@@ -38,6 +39,7 @@ module.exports = (postgres) => {
         }
       }
     },
+    //LATER - pt.2
     async getUserAndPasswordForVerification(email) {
       const findUserQuery = {
         text: '', // @TODO: Authentication - Server
@@ -51,6 +53,7 @@ module.exports = (postgres) => {
         throw 'User was not found.';
       }
     },
+    // NOW - pt.1
     async getUserById(id) {
       /**
        *  @TODO: Handling Server Errors
@@ -73,8 +76,9 @@ module.exports = (postgres) => {
        */
 
       const findUserQuery = {
-        text: '', // @TODO: Basic queries
+        text: 'SELECT * FROM users WHERE id = $1', // @TODO: Basic queries
         values: [id]
+
       };
 
       /**
@@ -87,63 +91,82 @@ module.exports = (postgres) => {
        */
 
       const user = await postgres.query(findUserQuery);
-      return user;
+      //console.log(user.rows[0]);
+      return user.rows[0];
       // -------------------------------
     },
+    //NOW -pt.1
     async getItems(idToOmit) {
       const items = await postgres.query({
         /**
          *  @TODO: Advanced queries
          *
          *  Get all Items. If the idToOmit parameter has a value,
-         *  the query should only return Items were the ownerid column
+         *  the query should only return Items where the ownerid column
          *  does not contain the 'idToOmit'
          *
          *  Hint: You'll need to use a conditional AND and WHERE clause
          *  to your query text using string interpolation
          */
 
-        text: ``,
+        text: `SELECT * FROM items WHERE id !=$1`,
         values: idToOmit ? [idToOmit] : []
       });
       return items.rows;
     },
+    //NOW - pt.1
     async getItemsForUser(id) {
       const items = await postgres.query({
-        /**
-         *  @TODO: Advanced queries
-         *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
-         */
-        text: ``,
+        text: `SELECT * FROM items WHERE ownerid = $1`,
         values: [id]
       });
       return items.rows;
     },
+    //NOW - pt.1
     async getBorrowedItemsForUser(id) {
       const items = await postgres.query({
         /**
          *  @TODO: Advanced queries
-         *  Get all Items. Hint: You'll need to use a LEFT INNER JOIN among others
          */
-        text: ``,
+        text: `SELECT * FROM items WHERE borrowerid = $1`,
         values: [id]
       });
       return items.rows;
     },
+    //NOW -pt.1
     async getTags() {
-      const tags = await postgres.query(/* @TODO: Basic queries */);
+      const tags = await postgres.query({
+        text: 'SELECT * FROM tags'
+        //values: []
+      });
       return tags.rows;
     },
+    //NOW pt.1
     async getTagsForItem(id) {
       const tagsQuery = {
-        text: ``, // @TODO: Advanced queries
+        text: `SELECT * FROM tags LEFT JOIN item_tags ON tags.id = item_tags.tag_id WHERE item_tags.item_id = $1`, // @TODO: Advanced queries
         values: [id]
       };
 
       const tags = await postgres.query(tagsQuery);
+      console.log(tags.rows);
       return tags.rows;
     },
-    async saveNewItem({ item, image, user }) {
+
+    // NOW
+    async saveNewItem({
+      title,
+      imageurl,
+      description,
+      ownerID,
+      borrowerID,
+      tagids,
+    }) {
+      // console.log('params>>>>>>>',  title,
+      //   description,
+      //   ownerID,
+      //   borrowerID,
+      //   tagids);
       /**
        *  @TODO: Adding a New Item
        *
@@ -163,98 +186,53 @@ module.exports = (postgres) => {
        *  Read the method and the comments carefully before you begin.
        */
 
-      return new Promise((resolve, reject) => {
-        /**
-         * Begin transaction by opening a long-lived connection
-         * to a client from the client pool.
-         */
-        postgres.connect((err, client, done) => {
-          try {
-            // Begin postgres transaction
-            client.query('BEGIN', err => {
-              // Convert image (file stream) to Base64
-              const imageStream = image.stream.pipe(strs('base64'));
+      /**
+       * Begin transaction by opening a long-lived connection
+       * to a client from the client pool.
+       * - Read about transactions here: https://node-postgres.com/features/transactions
+       */
+      const client = await postgres.connect()
+      try {
+        // Begin postgres transaction
+        await client.query('BEGIN')
 
-              let base64Str = '';
-              imageStream.on('data', data => {
-                base64Str += data;
-              });
+        // Insert new Item
+        // @TODO
+        // -------------------------------
+        const itemResult = await client.query({
+          text: 'INSERT INTO items (title, imageurl, description, ownerid, borrowerid) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+          values: [title, imageurl, description, ownerID, borrowerID]
+        })
 
-              imageStream.on('end', async () => {
-                // Image has been converted, begin saving things
-                const { title, description, tags } = item;
+        const newItemID = itemResult.rows[0].id;
 
-                // Generate new Item query
-                // @TODO
-                // -------------------------------
+        const myArray = [PRomise1, Promise2, Promise3];
 
-                // Insert new Item
-                // @TODO
-                // -------------------------------
+        await Promise.all(myArray);
 
-                const imageUploadQuery = {
-                  text:
-                    'INSERT INTO uploads (itemid, filename, mimetype, encoding, data) VALUES ($1, $2, $3, $4, $5) RETURNING *',
-                  values: [
-                    // itemid,
-                    image.filename,
-                    image.mimetype,
-                    'base64',
-                    base64Str
-                  ]
-                };
 
-                // Upload image
-                const uploadedImage = await client.query(imageUploadQuery);
-                const imageid = uploadedImage.rows[0].id;
+        // Insert tags
+        // @TODO
+        // -------------------------------
+        // const tagsResult = await client.query({
+        //   text: 'YOUR INSERT HERE'
+        // })
 
-                // Generate image relation query
-                // @TODO
-                // -------------------------------
-
-                // Insert image
-                // @TODO
-                // -------------------------------
-
-                // Generate tag relationships query (use the'tagsQueryString' helper function provided)
-                // @TODO
-                // -------------------------------
-
-                // Insert tags
-                // @TODO
-                // -------------------------------
-
-                // Commit the entire transaction!
-                client.query('COMMIT', err => {
-                  if (err) {
-                    throw err;
-                  }
-                  // release the client back to the pool
-                  done();
-                  // Uncomment this resolve statement when you're ready!
-                  // resolve(newItem.rows[0])
-                  // -------------------------------
-                });
-              });
-            });
-          } catch (e) {
-            // Something went wrong
-            client.query('ROLLBACK', err => {
-              if (err) {
-                throw err;
-              }
-              // release the client back to the pool
-              done();
-            });
-            switch (true) {
-              case /uploads_itemid_key/.test(e.message):
-                throw 'This item already has an image.';
-              default:
-                throw e;
-            }
+        // // Commit the entire transaction!
+        await client.query('COMMIT')
+console.log('inserted');
+        return itemResult.rows[0]
+      } catch (e) {
+        // Something went wrong
+        client.query('ROLLBACK', err => {
+          if (err) {
+            throw err;
           }
+          // release the client back to the pool
+          //done();
         });
-      });
+        throw e;
+      }
     }
-  };
-};
+  }
+}
