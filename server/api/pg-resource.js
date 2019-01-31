@@ -203,25 +203,37 @@ module.exports = (postgres) => {
           text: 'INSERT INTO items (title, imageurl, description, ownerid, borrowerid) VALUES ($1, $2, $3, $4, $5) RETURNING *',
           values: [title, imageurl, description, ownerID, borrowerID]
         })
-
+        console.log(itemResult)
         const newItemID = itemResult.rows[0].id;
 
-        const myArray = [PRomise1, Promise2, Promise3];
+        // const myArray = [PRomise1, Promise2, Promise3];
 
-        await Promise.all(myArray);
+        // await Promise.all(myArray);
 
 
         // Insert tags
         // @TODO
         // -------------------------------
+        // single row 
         // const tagsResult = await client.query({
-        //   text: 'YOUR INSERT HERE'
+        //   text: 'INSERT INTO item_tags (item_id, tag_id) VALUES ($1, $2)',
+        //   values: [newItemID, tag_id]
         // })
+
+        const tagPromises = tagids.map((tagID) => (
+          client.query({
+            text: 'INSERT INTO item_tags(item_id, tag_id) VALUES ($1, $2)',
+            values: [newItemID, tagID]
+          })
+        ))
+
+
+        await Promise.all(tagPromises)
 
         // // Commit the entire transaction!
         await client.query('COMMIT')
-console.log('inserted');
-        return itemResult.rows[0]
+          console.log('inserted');
+          return itemResult.rows[0]
       } catch (e) {
         // Something went wrong
         client.query('ROLLBACK', err => {
