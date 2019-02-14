@@ -26,6 +26,7 @@ module.exports = ({ app, pgResource }) => {
   // -------------------------------
 
   const apolloServer = new ApolloServer({
+
     context: ({ req }) => {
       // @TODO: Uncomment this later when we add auth (to be added to Apollo's context)
       // const tokenName = app.get("JWT_COOKIE_NAME")
@@ -34,6 +35,7 @@ module.exports = ({ app, pgResource }) => {
 
       return {
         /**
+         * 
          * @TODO: Provide Apollo context
          *
          * When initializing Apollo, we can provide a context object which will be
@@ -47,6 +49,7 @@ module.exports = ({ app, pgResource }) => {
          * you'll need to use in your resolving functions.
          */
         pgResource,
+        req
       };
     },
     schema
@@ -56,7 +59,7 @@ module.exports = ({ app, pgResource }) => {
     app,
     uploads: true,
     // @TODO: Add the CORS_CONFIG from your application configuration
-    cors: undefined,
+    cors: app.get('CORS_CONFIG'),
     // -------------------------------
     uploads: apolloUploadExpress({
       maxFileSize: 10000000 // 10mb

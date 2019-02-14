@@ -16,8 +16,9 @@
 const { ApolloError } = require('apollo-server-express');
 
 // @TODO: Uncomment these lines later when we add auth
-// const jwt = require("jsonwebtoken")
-// const authMutations = require("./auth")
+  const jwt = require("jsonwebtoken")
+   const authMutations = require("./auth")
+   const authenticate = require('../authenticate')
 // -------------------------------
 const { UploadScalar, DateScalar } = require('../custom-types');
 
@@ -28,7 +29,7 @@ module.exports = (app) => {
 
     Query: {
       //LATER - pt.2
-      viewer() {
+      async viewer(parent, args, {req, pgResource}) {
         /**
          * @TODO: Authentication - Server
          *
@@ -43,10 +44,16 @@ module.exports = (app) => {
          *  the token's stored user here. If there is no token, the user has signed out,
          *  in which case you'll return null
          */
-        return null;
+        
+        const userID = authenticate(app, req)
+
+        const user = await pgResource.getUserById(userID);
+
+        return user;
       },
       // query { user(id:5) {username}}
-      async user(parent, { id }, { pgResource }, info) {
+      async user(parent, { id }, { pgResource, req }, info) {
+        authenticate(app, req)
         try {
           const user = await pgResource.getUserById(id);
           return user;
@@ -55,7 +62,8 @@ module.exports = (app) => {
         }
       },
       //NOW - pt.1
-      async items(parent, { idToOmit }, { pgResource }, info) {
+      async items(parent, { idToOmit }, { pgResource, req }, info) {
+        authenticate(app, req)
         try {
           const items = await pgResource.getItems(idToOmit);
           return items;
@@ -67,7 +75,8 @@ module.exports = (app) => {
         // -------------------------------
       },
       //NOW - pt.1
-      async tags(parent, {},{ pgResource }, info) {
+      async tags(parent, {},{ pgResource, req }, info) {
+        authenticate(app, req)
         try {
           const tags = await pgResource.getTags();
           return tags;
@@ -92,7 +101,7 @@ module.exports = (app) => {
        *
        */
       // @TODO: Uncomment these lines after you define the User type with these fields
-      async items(parent, {}, { pgResource }, info) {
+      async items(parent, {}, { pgResource}, info) {
         try {
           const items = await pgResource.getItemsForUser(parent.id);
           return items;
@@ -147,7 +156,7 @@ module.exports = (app) => {
       //   bio: "Mock user. Remove me."
       // }
       },
-      async tags(parent, {}, { pgResource }, info) {
+      async tags(parent, {}, { pgResource}, info) {
         // @TODO: Replace this mock return statement with the correct tags for the queried Item from Postgres
         try {
           const tags = await pgResource.getTagsForItem(parent.id);
@@ -176,11 +185,11 @@ module.exports = (app) => {
 
     Mutation: {
       // @TODO: Uncomment this later when we add auth
-      // ...authMutations(app),
+      ...authMutations(app),
       // -------------------------------
 
-      async addItem(parent, args, context, info) {
-        console.log('agrs<<<<<<', args)
+      async addItem(parent, args, { pgResource, req }, info) {
+        args.input.ownerID = authenticate(app, req)
         /**
          *  @TODO: Destructuring
          *
@@ -196,7 +205,7 @@ module.exports = (app) => {
 
         // image = await image;
         // const user = await jwt.decode(context.token, app.get('JWT_SECRET'));
-        const newItem = await context.pgResource.saveNewItem(
+        const newItem = await pgResource.saveNewItem(
           args.input,
         );
         return newItem;

@@ -20,29 +20,31 @@ function tagsQueryString(tags, itemid, result) {
 module.exports = (postgres) => {
   return {
     //LATER- pt.2
-    async createUser({ fullname, email, password }) {
+    async createUser({ username, password, email, bio }) {
       const newUserInsert = {
-        text: '', // @TODO: Authentication - Server // ''
-        values: [fullname, email, password]
+        text: 'INSERT into users(username, password, email, bio) VALUES ($1, $2, $3, $4) RETURNING *', // @TODO: Authentication - Server // ''
+        values: [username, password, email ,bio]
       };
       try {
-        const user = await postgres.query(newUserInsert); 
+        const user = await postgres.query(newUserInsert);
+        console.log(user); 
         return user.rows[0];
       } catch (e) {
         switch (true) {
-          case /users_fullname_key/.test(e.message):
+          case /users_username_key/.test(e.message):
             throw 'An account with this username already exists.';
           case /users_email_key/.test(e.message):
             throw 'An account with this email already exists.';
           default:
-            throw 'There was a problem creating your account.';
+            // throw 'There was a problem creating your account.';
+            throw new Error(e);
         }
       }
     },
     //LATER - pt.2
     async getUserAndPasswordForVerification(email) {
       const findUserQuery = {
-        text: '', // @TODO: Authentication - Server
+        text: 'SELECT *  FROM users WHERE email = $1', // @TODO: Authentication - Server
         values: [email]
       };
       try {
@@ -109,7 +111,7 @@ module.exports = (postgres) => {
          *  to your query text using string interpolation
          */
 
-        text: `SELECT * FROM items WHERE id !=$1`,
+        text: `SELECT * FROM items ${idToOmit ? 'WHERE id !=$1' : '' }`,
         values: idToOmit ? [idToOmit] : []
       });
       return items.rows;
@@ -220,16 +222,16 @@ module.exports = (postgres) => {
         //   values: [newItemID, tag_id]
         // })
 
-        const tagPromises = tagids.map((tagID) => (
-          client.query({
-            text: 'INSERT INTO item_tags(item_id, tag_id) VALUES ($1, $2)',
-            values: [newItemID, tagID]
-          })
-        ))
-
-
-        await Promise.all(tagPromises)
-
+        if (tagids) {
+          const tagPromises = tagids.map((tagID) => (
+            client.query({
+              text: 'INSERT INTO item_tags(item_id, tag_id) VALUES ($1, $2)',
+              values: [newItemID, tagID]
+            })
+          ))
+          await Promise.all(tagPromises)
+        }
+        
         // // Commit the entire transaction!
         await client.query('COMMIT')
           console.log('inserted');
