@@ -76,7 +76,7 @@ module.exports = (app) => {
       },
       //NOW - pt.1
       async tags(parent, {},{ pgResource, req }, info) {
-        authenticate(app, req)
+        
         try {
           const tags = await pgResource.getTags();
           return tags;
@@ -209,7 +209,8 @@ module.exports = (app) => {
           args.input,
         );
         return newItem;
-      }
+      },
+
     }
   };
 };

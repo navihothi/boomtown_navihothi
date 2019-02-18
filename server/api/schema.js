@@ -66,9 +66,10 @@ module.exports = gql`
     user: User!
   }
 
+
   type Query {
     user(id: ID!): User
-    viewer: User
+    viewer: User!
     items(idToOmit: ID): [Item]
     tags: [Tag]
   }
@@ -77,5 +78,6 @@ module.exports = gql`
     addItem(input: NewItemInput!): Item!
     signup(input: NewUserInput!): LoginResponse!
     login(input: LoginInput!):  LoginResponse!
+
   }
 `;

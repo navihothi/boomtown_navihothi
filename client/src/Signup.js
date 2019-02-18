@@ -8,14 +8,17 @@ import App from './App.js'
 
 import { makeStyles } from '@material-ui/styles'
 import { ThemeProvider} from '@material-ui/styles'
+import { unstable_Box as Box } from '@material-ui/core/Box';
 import { 
          Typography,
          TextField,
          Button,
-         Portal
    } from '@material-ui/core';
 
    const useStyles = makeStyles ({
+    signupForm: {
+      marginLeft: 100,
+    },
     signIn: {
       color: '#000',
       textDecoration: 'none',
@@ -25,8 +28,9 @@ import {
     },
     inputField: {
       width: 325,
+      marginBottom: 15
     },
-    linkContainer:{}
+    
   })
 
 
@@ -49,7 +53,6 @@ const Signup = ({
     return (
     <ThemeProvider>
       <div>
-        <Typography variant = 'overline'>sign-up here</Typography>
         <Mutation 
           mutation={SIGN_UP}
           onCompleted= {(data) => {
@@ -61,7 +64,8 @@ const Signup = ({
             alert(error)
           }}>
         {(signup, { data }) => (
-          <div>
+          <div className="signupForm">
+            <Typography variant = 'overline'>sign-up here</Typography>
             <Formik
               initialValues={
                 {
@@ -151,19 +155,21 @@ const Signup = ({
               {errors.password &&
                 touched.password && <div className="input-feedback">{errors.password}</div>}
 
-                <Button
-                  type="submit"
-                  className="outline"
-                  disabled={isSubmitting}
-                  variant="contained"
-                  color="secondary"
-                >
-                  submit
-                </Button>
+                <Box display="flex" justifyContent="space-between" alignItems="center" marginTop="15px">
+                  <Button
+                    type="submit"
+                    className="outline"
+                    disabled={isSubmitting}
+                    variant="contained"
+                    color="secondary"
+                  >
+                    submit
+                  </Button>
 
-                <Link to="/" className={classes.signIn}>
-                  login to existing account
-                </Link>
+                  <Link to="/" className={classes.signIn}>
+                    login to existing account
+                  </Link>
+                </Box>
               {/* <DisplayFormikState {...props} /> */}
             </form>
           );

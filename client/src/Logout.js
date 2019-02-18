@@ -4,15 +4,15 @@ import { Link } from 'react-router-dom'
 const Logout = ({
   setCSRFToken,
 }) => (
-  <Link to='/'>
-    <button
-      onClick={ () => {
-        localStorage.removeItem('token')
-        setCSRFToken(null)
-      }}>
-      logout
+    <Link to='/'>
+      <button
+        onClick={() => {
+          localStorage.removeItem('token')
+          setCSRFToken(null)
+        }}>
+        logout
     </button>
-  </Link>
-) 
+    </Link>
+  )
 
 export default Logout;

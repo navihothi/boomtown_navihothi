@@ -9,29 +9,32 @@ import Select from 'react-select'
 
 import App from './App.js'
 
-import { ThemeProvider} from '@material-ui/styles'
+import { ThemeProvider } from '@material-ui/styles'
+import { unstable_Box as Box } from '@material-ui/core/Box';
 import {
-         Typography,
-         TextField,
-         Button,
-         Portal
-   } from '@material-ui/core';
+  Typography,
+  TextField,
+  Button,
 
-  const useStyles = makeStyles ({
-    createAccount: {
-      color: '#000',
-      textDecoration: 'none',
-      fontSize: 11,
-      textTransform: 'uppercase',
-      fontWeight: 500,
-    },
-    inputField: {
-      width: 325,
-    },
-    linkContainer: {
-      display: 'flex'
-    }
-  })
+} from '@material-ui/core';
+
+const useStyles = makeStyles({
+  loginForm: {
+    marginLeft: 100,
+  },
+  createAccount: {
+    color: '#000',
+    textDecoration: 'none',
+    fontSize: 11,
+    textTransform: 'uppercase',
+    fontWeight: 500,
+  },
+  inputField: {
+    width: 325,
+    marginBottom: 20,
+  },
+
+})
 
 const LOG_IN = gql`
   mutation loginMutation ($user: LoginInput!) {
@@ -47,46 +50,45 @@ const LOG_IN = gql`
 
 const Login = ({
   setCSRFToken
-  }) => {
+}) => {
   const classes = useStyles();
-    return (
-  <ThemeProvider >
+  return (
     <div>
-      <Typography variant="overline">welcome back fam</Typography>
       <Mutation
         mutation={LOG_IN}
-        onCompleted={ (data) => {
+        onCompleted={(data) => {
           console.log('csrf token:', data.login.csrfToken)
           localStorage.setItem('token', data.login.csrfToken)
           setCSRFToken(data.login.csrfToken)
         }}
-        onError={ (error) => {
+        onError={(error) => {
           alert(error)
         }}>
-          {(login, { data }) => (
-            <div className="loginForm">
-              <Formik
-                initialValues={
-                  {
-                    email: '',
-                    password: ''
-                  }
+        {(login, { data }) => (
+          <div className="loginForm">
+            <Typography variant="overline">welcome back fam</Typography>
+            <Formik
+              initialValues={
+                {
+                  email: '',
+                  password: ''
                 }
-                onSubmit={(values, { setSubmitting }) => {
-                  setTimeout(() => {
-                    alert(JSON.stringify(values, null, 2));
-                    login({variables: {user: values}})
-                    setSubmitting(false);
-                  }, 500);
-                }}
-                validationSchema={Yup.object().shape({
-                  email: Yup.string()
-                    .email()
-                    .required('Required'),
-                  password: Yup.string(),
-                    //password must contain a minimum eight characters, at least one letter and one number
-                })}
-              >
+              }
+              onSubmit={(values, { setSubmitting }) => {
+                setTimeout(() => {
+                  alert(JSON.stringify(values, null, 2));
+                  login({ variables: { user: values } })
+                  setSubmitting(false);
+                }, 500);
+              }}
+              validationSchema={Yup.object().shape({
+                email: Yup.string()
+                  .email()
+                  .required('Required'),
+                password: Yup.string(),
+                //password must contain a minimum eight characters, at least one letter and one number
+              })}
+            >
               {props => {
                 const {
                   values,
@@ -113,7 +115,7 @@ const Login = ({
                         ${classes.inputField}
                         ${errors.email && touched.email ? 'text-input error' : 'text-input'}
                       }`
-                    }
+                      }
                     /><br />
                     {errors.email &&
                       touched.email && <div className="input-feedback">{errors.email}</div>}
@@ -128,38 +130,37 @@ const Login = ({
                       onBlur={handleBlur}
                       className={`{
                         ${classes.inputField}
-                        ${errors.password && touched.password? 'text-input error' : 'text-input'}
-                      }` 
-                    }
+                        ${errors.password && touched.password ? 'text-input error' : 'text-input'}
+                      }`
+                      }
                     /><br />
                     {errors.password &&
                       touched.password && <div className="input-feedback">{errors.password}</div>}
 
-                
-                    <Button
-                      type="submit"
-                      className="outline"
-                      disabled={isSubmitting}
-                      variant="contained"
-                      color="secondary"
-                    >
-                      submit
+                    <Box display="flex" justifyContent="space-between" alignItems="center" marginTop="20px">
+                      <Button
+                        type="submit"
+                        className="outline"
+                        disabled={isSubmitting}
+                        variant="contained"
+                        color="secondary"
+                      >
+                        submit
                     </Button>
 
-                    <Link to="/Signup" className={classes.createAccount}>
-                      create an account
+                      <Link to="/Signup" className={classes.createAccount}>
+                        create an account
                     </Link>
-               
-                  {/* <DisplayFormikState {...props} /> */}
-                </form>
-              );
-            }}
-        </Formik>
-        </div>
-      )}
+                    </Box>
+                    {/* <DisplayFormikState {...props} /> */}
+                  </form>
+                );
+              }}
+            </Formik>
+          </div>
+        )}
       </ Mutation>
     </div>
-  </ThemeProvider>
   )
 }
 

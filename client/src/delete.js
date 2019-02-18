@@ -4,21 +4,23 @@ import gql from "graphql-tag";
 
 import { Query } from "react-apollo";
 
-const BorrowItem = () => (
+const ItemLibrary = () => (
   <div>
-    <h1>borrow an item</h1>
+    <h1>library item</h1>
     <Query
       query={gql`
           query {
-            viewer {
-              borrowed {
+            items {
+              id
+              title
+              description
+              tags {
                 id
                 title
-                description
               }
             }
           }
-          `}
+        `}
     >
       {({ loading, error, data }) => {
         if (loading) return <p>Loading...</p>;
@@ -27,9 +29,9 @@ const BorrowItem = () => (
           return <p>Test There was an error</p>
         }
         console.log(data);
-        return data.viewer.borrowed.map(({ id, title, description }) => (
+        return data.items.map(({ id, title, description }) => (
           <div key={id}>
-            <p>Item {id}: {title} AND {description}</p>
+            <p>Item {id}: {title}</p>
           </div>
         ));
       }}
@@ -37,4 +39,4 @@ const BorrowItem = () => (
   </div>
 )
 
-export default BorrowItem;
+export default ItemLibrary;

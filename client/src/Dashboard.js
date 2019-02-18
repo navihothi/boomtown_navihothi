@@ -1,46 +1,105 @@
-import React from 'react'
-import { BrowserRouter as Router,
-         Route, 
-         Link
-        } from "react-router-dom"
+import React from 'react';
+import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from "react-router-dom"
 
-import './assets/App.css';
 import App from './App'
 import MyItems from './MyItems'
 import CreateItem from './CreateItem'
 import BorrowItem from './BorrowItem'
 import ItemLibrary from './ItemLibrary'
-import { makeStyles } from '@material-ui/styles'
+import Logout from './Logout'
 
-const useStyles = makeStyles ({
+import PropTypes from 'prop-types';
+import { withStyles } from '@material-ui/core/styles';
+import {
+  Drawer,
+  AppBar,
+  CssBaseline,
+  Toolbar,
+  List,
+  Typography,
+  Divider,
+  ListItem,
+  ListItemText,
+} from '@material-ui/core';
 
-})
+const drawerWidth = 240;
+const styles = theme => ({
+  root: {
+    display: 'flex',
+  },
+  appBar: {
+    zIndex: theme.zIndex.drawer + 1,
+  },
+  drawer: {
+    width: drawerWidth,
+    flexShrink: 0,
+  },
+  drawerPaper: {
+    width: drawerWidth,
+  },
+  content: {
+    flexGrow: 1,
+    padding: theme.spacing.unit * 3,
+  },
+  toolbar: theme.mixins.toolbar,
+});
 
-const Dashboard = ({
-  setCSRFToken
-  }) => {
-
-  const classes = useStyles();
+function ClippedDrawer({classes, setCSRFToken}) {
 
   return (
-  <Router>
-    <div>
-      dashboard
-      <ul className={classes}>
-        <li><Link to='/'><button>my items</button></Link></li>
-        <li><Link to='/CreateItem'><button>create item</button></Link></li>
-        <li><Link to='/BorrowItem'><button>borrow an item</button></Link></li>
-        <li><Link to='/ItemLibrary'><button>items library</button></Link></li>
-      </ul>
-
-      <Route path='/' exact component={MyItems}/>
-      <Route path='/CreateItem' component={CreateItem}/>
-      <Route path='/BorrowItem' component={BorrowItem}/>
-      <Route path='/ItemLibrary' component={ItemLibrary}/>
+    <div className={classes.root}>
+      <CssBaseline />
+      <AppBar position="fixed" className={classes.appBar}>
+        <Toolbar>
+          <Typography variant="h6" color="inherit" noWrap>
+            B O O M town
+          </Typography>
+          <Logout setCSRFToken={setCSRFToken}/>
+        </Toolbar>
+      </AppBar>
+      <Drawer
+        className={classes.drawer}
+        variant="permanent"
+        classes={{
+          paper: classes.drawerPaper,
+        }}
+      >
+        <div className={classes.toolbar} /> 
+        <List>
+          <ListItem className={classes.listItemm} button component={Link} to='/'>
+            <ListItemText primary='I T E M S' />
+          </ListItem>
+          <Divider />
+          <ListItem className={classes.listItem} button component={Link} to='/CreateItem'>
+            <ListItemText primary='A D D    I T E M' />
+          </ListItem>
+          <Divider />
+          <ListItem className={classes.listItem} button component={Link} to='/BorrowItem'>
+            <ListItemText primary='B O R R O W ' />
+          </ListItem>
+          <Divider />
+          <ListItem className={classes.listItem} button component={Link} to='/ItemLibrary'>
+            <ListItemText primary='L I B R A R Y ' />
+          </ListItem>
+        </List>
+        </Drawer>
+        <main className={classes.content}>
+          <div className={classes.toolbar} /> 
+            <Route path='/' exact component={MyItems} />
+            <Route path='/CreateItem' component={CreateItem} />
+            <Route path='/BorrowItem' component={BorrowItem} />
+            <Route path='/ItemLibrary' component={ItemLibrary} />
+        </main>
     </div>
-  </Router>
   )
-}
+};
 
-export default Dashboard;
+ClippedDrawer.propTypes = {
+  classes: PropTypes.object.isRequired,
+};
 
+export default withStyles(styles)(ClippedDrawer);
