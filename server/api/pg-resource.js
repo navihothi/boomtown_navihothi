@@ -247,6 +247,17 @@ module.exports = (postgres) => {
         });
         throw e;
       }
-    }
+    },
+    async borrowItem({itemID, borrowerID}) {
+      const items = await postgres.query({
+        /**
+         *  @TODO: Advanced queries
+         */
+        text: `UPDATE items SET borrowerID = $1 WHERE id = $2 AND borrowerid IS NULL RETURNING *`,
+        values: [borrowerID, itemID]
+      });
+      console.log(items);
+      return items.rows[0];
+    },
   }
 }

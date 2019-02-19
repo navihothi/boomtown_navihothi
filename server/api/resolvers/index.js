@@ -211,6 +211,17 @@ module.exports = (app) => {
         return newItem;
       },
 
+      async borrow(parent, args, { pgResource, req }, info) {
+        args.input.borrowerID = authenticate(app, req)
+        console.log(args.input);
+        const item = await pgResource.borrowItem (
+          args.input,
+
+        );
+        
+        return item;
+      } 
+
     }
   };
 };

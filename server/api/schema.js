@@ -67,6 +67,10 @@ module.exports = gql`
   }
 
 
+  input BorrowItem {
+    itemID: ID!
+  }
+
   type Query {
     user(id: ID!): User
     viewer: User!
@@ -78,6 +82,6 @@ module.exports = gql`
     addItem(input: NewItemInput!): Item!
     signup(input: NewUserInput!): LoginResponse!
     login(input: LoginInput!):  LoginResponse!
-
+    borrow(input: BorrowItem!): Item!
   }
 `;

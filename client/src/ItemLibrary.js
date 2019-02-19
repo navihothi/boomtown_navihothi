@@ -3,6 +3,8 @@ import gql from "graphql-tag";
 import { Query } from "react-apollo";
 import { withStyles } from '@material-ui/styles'
 import PropTypes from 'prop-types'
+import { Mutation } from 'react-apollo'
+
 
 import {
   Card,
@@ -39,11 +41,19 @@ const styles = {
   }
 }
 
+const BORROW_ITEM = gql`
+  mutation borrowMutation ($item: BorrowItem!) {
+    borrow( input:$item ) {
+        id
+        title
+      } 
+    }`;
+
 function SimpleCard(props) {
-  const {classes} = props;
+  const { classes } = props;
   const bull = <span className={classes.bullet}>.</span>
 
-  return(
+  return (
     <div className="itemLibrary">
       <Grid container spacing={32}>
         <Query
@@ -60,7 +70,7 @@ function SimpleCard(props) {
               }
             }
           `}
-          >
+        >
           {({ loading, error, data }) => {
             if (loading) return <p>Loading...</p>;
             if (error) {
@@ -68,29 +78,53 @@ function SimpleCard(props) {
               return <p>Test There was an error</p>
             }
             return data.items.map(({ id, title, description }) => (
-              <div key={id}>
-                <Grid item >
-                  <Card className={classes.card}>
-                    <CardContent>
-                      <Typography className={classes.title} gutterBottom>
-                        I T E M :
-                      </Typography>
-                      <Typography variant="h5" component="h2">
-                      {title} 
-                      </Typography>
-                      <br />
-
-                      <Typography component="p" className={classes.description}>
-                      {description}
+              <Mutation
+                mutation={BORROW_ITEM}
+                onCompleted={(data) => {
+                  console.log(data);
+                }}
+                onError={(error) => {
+                  alert(error)
+                }}>
+                {(borrow, { loading, error, data }) => {
+                if (loading) return <p>Loading...</p>;
+                if (error) {
+                  console.log(error);
+                  return <p>This shit is broken.</p>
+                }
+                return (
+                <div key={id}>
+                  <Grid item >
+                    <Card className={classes.card}>
+                      <CardContent>
+                        <Typography className={classes.title} gutterBottom>
+                          I T E M :
+                        </Typography>
+                        <Typography variant="h5" component="h2">
+                          {title}
+                        </Typography>
                         <br />
-                      </Typography>
-                    </CardContent>
-                    <CardActions>
-                      <Button color="secondary" size="small">borrow</Button>
-                    </CardActions>
-                  </Card>
-                </Grid>
-              </div>
+
+                        <Typography component="p" className={classes.description}>
+                          {description}
+                          <br />
+                        </Typography>
+                      </CardContent>
+                      <CardActions>
+                        <Button
+                          color="secondary"
+                          size="small"
+                          onClick={() => {
+                            borrow({variables: {item: {
+                              itemID: id
+                            }}})
+                          }} >borrow</Button>
+                      </CardActions>
+                    </Card>
+                  </Grid>
+                </div>
+                )}}
+              </Mutation>
             ));
           }}
         </Query>
